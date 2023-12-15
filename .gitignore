@@ -6,4 +6,5 @@ pyvenv.cfg
 client_secret.json
 .env
 .DS_Store
+token.pickle
 ```
