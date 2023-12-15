@@ -61,7 +61,15 @@ def get_events(service, calendar_id=calendar_id):
 
 # Call the get_events function
 events = get_events(service)
-print(events)
+
+
+# How Many Events Do You Have Tomorrow?
+event_count=0
+if events != []:
+    for event in events:
+        event_count=event_count+1
+print(f'You have {event_count} events tomorrow.')
+
 
 
 
