@@ -3,6 +3,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from datetime import datetime, timedelta
 import pytz,dateutil.parser, os
+from dateutil.parser import parse
 import pickle
 from dotenv import load_dotenv
 
@@ -71,8 +72,23 @@ if events != []:
 print(f'You have {event_count} events tomorrow.')
 
 
+def analyze_events(events, expected_duration):
+    for event in events:
+        start = parse(event['start'].get('dateTime', event['start'].get('date')))
+        end = parse(event['end'].get('dateTime', event['end'].get('date')))
+        duration = end - start
+        if duration < expected_duration:
+            print(f'Event "{event["summary"]}" is shorter than the expected duration of {expected_duration} minutes.')
+        elif duration > expected_duration:
+            print(f'Event "{event["summary"]}" is longer than the expected duration of {expected_duration} minutes.')
+        else:
+            print(f'Event "{event["summary"]}" is the expected duration of {expected_duration} minutes.')
+            
+# Define the expected duration of each event
+expected_duration = timedelta(minutes=15)
 
-
+# Analyze events
+analyze_events(events, expected_duration)
 
 
 
@@ -81,9 +97,6 @@ print(f'You have {event_count} events tomorrow.')
 
 ## TODO
 
-# def analyze_events(events):
-#     # Analyze events and find optimization opportunities
-#     pass
 
 # def create_event(service, calendar_id='primary', event_data=None):
 #     # Create a new event or update an existing one
