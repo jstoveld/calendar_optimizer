@@ -84,14 +84,35 @@ def analyze_events(events, expected_duration):
         else:
             print(f'Event "{event["summary"]}" is the expected duration of {expected_duration} minutes.')
             
+
+
+
 # Define the expected duration of each event
 expected_duration = timedelta(minutes=15)
+
 
 # Analyze events
 analyze_events(events, expected_duration)
 
+# Calendar Items Start Times
+# The start time of each event is stored in the start key of the event dictionary. The value of the start key is another dictionary that contains the dateTime key. The value of the dateTime key is a string that represents the start time of the event in RFC3339 format.
+def analyze_start_times(events):
+    morning = 0
+    afternoon = 0
+    evening = 0
 
+    for event in events:
+        start = parse(event['start'].get('dateTime', event['start'].get('date')))
+        if start.hour < 12:
+            morning += 1
+        elif start.hour < 18:
+            afternoon += 1
+        else:
+            evening += 1
 
+    print(f'You have {morning} events in the morning, {afternoon} events in the afternoon, and {evening} events in the evening.')
+# Analyze start times
+analyze_start_times(events)
 
 
 
