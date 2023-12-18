@@ -71,29 +71,35 @@ if events != []:
         event_count=event_count+1
 print(f'You have {event_count} events tomorrow.')
 
-
 def analyze_events(events, expected_duration):
+    too_short_events = []
+    too_long_events = []
+    right_duration_events = []
+
     for event in events:
         start = parse(event['start'].get('dateTime', event['start'].get('date')))
         end = parse(event['end'].get('dateTime', event['end'].get('date')))
         duration = end - start
-        if duration < expected_duration:
-            print(f'Event "{event["summary"]}" is shorter than the expected duration of {expected_duration} minutes.')
-        elif duration > expected_duration:
-            print(f'Event "{event["summary"]}" is longer than the expected duration of {expected_duration} minutes.')
-        else:
-            print(f'Event "{event["summary"]}" is the expected duration of {expected_duration} minutes.')
-            
+        if 'hour' in event.get('description', ''):
+            expected_duration = timedelta(hours=1)
 
-
+        if expected_duration is not None:
+            if duration < expected_duration:
+                too_short_events.append(event)
+            elif duration > expected_duration:
+                too_long_events.append(event)
+            else:
+                right_duration_events.append(event)
+    print(f'You have {len(too_short_events)} calendar events that are too short.')
+    print(f'You have {len(too_long_events)} calendar events that are too long.')
+    print(f'You have {len(right_duration_events)} calendar events with the right duration.')
+    return too_short_events, too_long_events, right_duration_events
 
 # Define the expected duration of each event
 expected_duration = timedelta(minutes=15)
 
-
 # Analyze events
 analyze_events(events, expected_duration)
-
 # Calendar Items Start Times
 # The start time of each event is stored in the start key of the event dictionary. The value of the start key is another dictionary that contains the dateTime key. The value of the dateTime key is a string that represents the start time of the event in RFC3339 format.
 def analyze_start_times(events):
@@ -119,12 +125,7 @@ analyze_start_times(events)
 ## TODO
 
 
-# def create_event(service, calendar_id='primary', event_data=None):
-#     # Create a new event or update an existing one
-#     pass
 
-# # Get events
-# events = get_events(service)
 
 # # Analyze and optimize
 # optimized_events = analyze_events(events)
@@ -132,3 +133,10 @@ analyze_start_times(events)
 # # Create or update events
 # for event in optimized_events:
 #     create_event(service, event_data=event)
+
+
+# def create_event(service, calendar_id='primary', event_data=None):
+#     # Create a new event or update an existing one
+#     pass
+
+
