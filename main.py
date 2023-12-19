@@ -71,6 +71,10 @@ if events != []:
         event_count=event_count+1
 print(f'You have {event_count} events tomorrow.')
 
+
+
+## Find out if events are too long or too short for the intended action
+## TODO Bake in the ability to change the expected duration of each event
 def analyze_events(events, expected_duration):
     too_short_events = []
     too_long_events = []
@@ -79,6 +83,10 @@ def analyze_events(events, expected_duration):
     for event in events:
         start = parse(event['start'].get('dateTime', event['start'].get('date')))
         end = parse(event['end'].get('dateTime', event['end'].get('date')))
+        if start.tzinfo is None or start.tzinfo.utcoffset(start) is None:
+            start = start.replace(tzinfo=pytz.UTC)
+        if end.tzinfo is None or end.tzinfo.utcoffset(end) is None:
+            end = end.replace(tzinfo=pytz.UTC)
         duration = end - start
         if 'hour' in event.get('description', ''):
             expected_duration = timedelta(hours=1)
@@ -95,13 +103,6 @@ def analyze_events(events, expected_duration):
     print(f'You have {len(right_duration_events)} calendar events with the right duration.')
     return too_short_events, too_long_events, right_duration_events
 
-# Define the expected duration of each event
-expected_duration = timedelta(minutes=15)
-
-# Analyze events
-analyze_events(events, expected_duration)
-# Calendar Items Start Times
-# The start time of each event is stored in the start key of the event dictionary. The value of the start key is another dictionary that contains the dateTime key. The value of the dateTime key is a string that represents the start time of the event in RFC3339 format.
 def analyze_start_times(events):
     morning = 0
     afternoon = 0
@@ -109,6 +110,8 @@ def analyze_start_times(events):
 
     for event in events:
         start = parse(event['start'].get('dateTime', event['start'].get('date')))
+        if start.tzinfo is None or start.tzinfo.utcoffset(start) is None:
+            start = start.replace(tzinfo=pytz.UTC)
         if start.hour < 12:
             morning += 1
         elif start.hour < 18:
@@ -117,7 +120,6 @@ def analyze_start_times(events):
             evening += 1
 
     print(f'You have {morning} events in the morning, {afternoon} events in the afternoon, and {evening} events in the evening.')
-# Analyze start times
 analyze_start_times(events)
 
 
