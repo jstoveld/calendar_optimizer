@@ -122,23 +122,45 @@ def analyze_start_times(events):
     print(f'You have {morning} events in the morning, {afternoon} events in the afternoon, and {evening} events in the evening.')
 analyze_start_times(events)
 
+def meeting_overlap(events):
+    # First, ask the user about each event and modify the end time
+    for i in range(len(events)):
+        all_day = input(f"Is the event '{events[i]['summary']}' an all-day event? (yes/no) ")
+        if all_day.lower() == 'no':
+            duration = input("How long should this event be? 15, 30, or 60 minutes? ")
+            while duration not in ['15', '30', '60']:
+                print("Invalid input. Please enter 15, 30, or 60.")
+                duration = input("How long should this event be? 15, 30, or 60 minutes? ")
+            duration = timedelta(minutes=int(duration))
+            start_i = parse(events[i]['start'].get('dateTime', events[i]['start'].get('date')))
+            events[i]['end']['dateTime'] = (start_i + duration).isoformat()
 
+    # Then, compare each event with every other event to check for overlaps
+    overlap = False
+    overlapping_events = []
+    checked_pairs = set()
+    for i in range(len(events)):
+        for j in range(i + 1, len(events)):
+            if (i, j) in checked_pairs or (j, i) in checked_pairs:
+                continue
+            checked_pairs.add((i, j))
+            start_i = events[i]['start'].get('dateTime', events[i]['start'].get('date'))
+            end_i = events[i]['end'].get('dateTime', events[i]['end'].get('date'))
+            start_j = events[j]['start'].get('dateTime', events[j]['start'].get('date'))
+            end_j = events[j]['end'].get('dateTime', events[j]['end'].get('date'))
 
-## TODO
+            if start_i and end_i and start_j and end_j:
+                if start_i < end_j and end_i > start_j:
+                    overlap = True
+                    overlapping_events.append(events[i]['summary'])  # Only append the title of the event
 
+    if overlap:
+        print('You have overlapping events tomorrow:')
+        for event in overlapping_events:
+            start_time = events[i]['start'].get('dateTime', events[i]['start'].get('date'))
+            end_time = events[i]['end'].get('dateTime', events[i]['end'].get('date'))
+            print(f'Event: {event}, Start time: {start_time}, End time: {end_time}')
+    else:
+        print('You have no overlapping events tomorrow.')
 
-
-
-# # Analyze and optimize
-# optimized_events = analyze_events(events)
-
-# # Create or update events
-# for event in optimized_events:
-#     create_event(service, event_data=event)
-
-
-# def create_event(service, calendar_id='primary', event_data=None):
-#     # Create a new event or update an existing one
-#     pass
-
-
+meeting_overlap(events)
