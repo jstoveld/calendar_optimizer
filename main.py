@@ -164,3 +164,29 @@ def meeting_overlap(events):
         print('You have no overlapping events tomorrow.')
 
 meeting_overlap(events)
+
+
+## TODO
+## Clear up overlapping events by finding available times.
+
+# def resolve_overlaps(events):
+#     # Sort the events by start time
+#     events.sort(key=lambda x: x['start'].get('dateTime', x['start'].get('date')))
+
+#     non_overlapping_events = []
+#     for event in events:
+#         if non_overlapping_events:
+#             last_event = non_overlapping_events[-1]
+#             if event['start'].get('dateTime', event['start'].get('date')) < last_event['end'].get('dateTime', last_event['end'].get('date')):
+#                 # If the event overlaps with the last event, adjust its start time
+#                 event['start']['dateTime'] = last_event['end'].get('dateTime', last_event['end'].get('date'))
+#         non_overlapping_events.append(event)
+
+#     return non_overlapping_events
+
+# non_overlapping_events = resolve_overlaps(events)
+
+# for event in non_overlapping_events:
+#     start_time = event['start'].get('dateTime', event['start'].get('date'))
+#     end_time = event['end'].get('dateTime', event['end'].get('date'))
+#     print(f'Event: {event["summary"]}, Start time: {start_time}, End time: {end_time}')
