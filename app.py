@@ -23,3 +23,10 @@ tomorrow = datetime.utcnow() + timedelta(days=1)
 tomorrow = tomorrow.isoformat() + 'Z'
 
 
+## Interact with user
+print('What time do you want to start your day?')
+start_time = input()
+print('What time do you want to end your day?')
+end_time = input()
+
+
