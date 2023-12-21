@@ -1,18 +1,20 @@
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-from datetime import datetime, timedelta
-import pytz,dateutil.parser, os
-from dateutil.parser import parse
-import pickle
-from dotenv import load_dotenv
-from authentication import Authentication
+class Calendar:
+    def __init__(self, service, calendar_id):
+        self.service = service
+        self.calendar_id = calendar_id
 
-## Load environment variables
-load_dotenv()
-calendar_id = os.getenv('CALENDAR_ID')
-
-## Establish Authentication
-auth = Authentication()
-service = auth.build_service()
-
+    def create_event(self, start_time, end_time, summary, description=None):
+        event = {
+            'summary': summary,
+            'description': description,
+            'start': {
+                'dateTime': start_time.isoformat(),
+                'timeZone': 'America/Los_Angeles',
+            },
+            'end': {
+                'dateTime': end_time.isoformat(),
+                'timeZone': 'America/Los_Angeles',
+            },
+        }
+        event = self.service.events().insert(calendarId=self.calendar_id, body=event).execute()
+        return event

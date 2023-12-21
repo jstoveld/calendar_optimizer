@@ -1,18 +1,32 @@
+import os
+import pickle
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-from datetime import datetime, timedelta
-import pytz,dateutil.parser, os
-from dateutil.parser import parse
-import pickle
-from dotenv import load_dotenv
-from authentication import Authentication
 
-## Load environment variables
-load_dotenv()
-calendar_id = os.getenv('CALENDAR_ID')
+class Authentication:
+    def __init__(self):
+        # Define the scopes required by the Google Calendar API
+        self.SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-## Establish Authentication
-auth = Authentication()
-service = auth.build_service()
-
+    def build_service(self):
+        """Builds and returns a service object for the Google Calendar API."""
+        creds = None
+        # The file token.pickle stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first time.
+        if os.path.exists('token.pickle'):
+            with open('token.pickle', 'rb') as token:
+                creds = pickle.load(token)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    'credentials.json', self.SCOPES)
+                creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
+        service = build('calendar', 'v3', credentials=creds)
+        return service
