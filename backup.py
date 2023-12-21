@@ -154,39 +154,100 @@ def meeting_overlap(events):
                     overlap = True
                     overlapping_events.append(events[i]['summary'])  # Only append the title of the event
 
-    if overlap:
-        print('You have overlapping events tomorrow:')
-        for event in overlapping_events:
-            start_time = events[i]['start'].get('dateTime', events[i]['start'].get('date'))
-            end_time = events[i]['end'].get('dateTime', events[i]['end'].get('date'))
-            print(f'Event: {event}, Start time: {start_time}, End time: {end_time}')
-    else:
-        print('You have no overlapping events tomorrow.')
+            overlapping_events_info = []
+            if overlap:
+                print('You have overlapping events tomorrow:')
+                for event in overlapping_events:
+                    for i in range(len(events)):
+                        if events[i]['summary'] == event:
+                            start_time = events[i]['start']
+                            end_time = events[i]['end']
+                            event_id = events[i]['id']  # Get the 'id' of the event
+                            print(f'Event: {event}, Start time: {start_time.get("dateTime", start_time.get("date"))}, End time: {end_time.get("dateTime", end_time.get("date"))}')
+                            overlapping_events_info.append({
+                                'summary': event,
+                                'start': start_time,
+                                'end': end_time,
+                                'id': event_id  # Include the 'id' in the event info
+                            })
+            else:
+                print('You have no overlapping events tomorrow.')
 
-meeting_overlap(events)
+            return overlapping_events_info
 
+
+overlapping_events_info = meeting_overlap(events)
+
+## How to Change the Time of an Event
+def change_event_time(service, event, new_start_time, new_end_time):
+    # Ensure the start and end times are in RFC3339 format
+    if isinstance(new_start_time, datetime):
+        new_start_time = new_start_time.isoformat()
+    if isinstance(new_end_time, datetime):
+        new_end_time = new_end_time.isoformat()
+
+    event['start'] = {'dateTime': new_start_time, 'timeZone': 'UTC'}
+    event['end'] = {'dateTime': new_end_time, 'timeZone': 'UTC'}
+
+    try:
+        updated_event = service.events().update(
+            calendarId=calendar_id,
+            eventId=event['id'],
+            body=event
+        ).execute()
+        print(f"Updated event '{event['summary']}' with new start time {new_start_time} and end time {new_end_time}")
+    except Exception as e:
+        print(f"Failed to update event '{event['summary']}': {str(e)}")
 
 ## TODO
 ## Clear up overlapping events by finding available times.
+def resolve_overlaps(overlapping_events_info):
+    # Sort the events by start time
+    overlapping_events_info.sort(key=lambda x: x['start'].get('dateTime', x['start'].get('date')))
 
-# def resolve_overlaps(events):
-#     # Sort the events by start time
-#     events.sort(key=lambda x: x['start'].get('dateTime', x['start'].get('date')))
+    non_overlapping_events = []
+    for event in overlapping_events_info:
+        if non_overlapping_events:
+            last_event = non_overlapping_events[-1]
+            if event['start'].get('dateTime', event['start'].get('date')) < last_event['end'].get('dateTime', last_event['end'].get('date')):
+                # If the event overlaps with the last event, adjust its start time and end time
+                event['start'] = {'dateTime': last_event['end'].get('dateTime', last_event['end'].get('date'))}
+                event_end = parse(event['end'].get('dateTime', event['end'].get('date')))
+                event['end'] = {'dateTime': (parse(event['start']['dateTime']) + (event_end - parse(last_event['end'].get('dateTime', last_event['end'].get('date'))))).isoformat()}
+        non_overlapping_events.append(event)
 
-#     non_overlapping_events = []
-#     for event in events:
-#         if non_overlapping_events:
-#             last_event = non_overlapping_events[-1]
-#             if event['start'].get('dateTime', event['start'].get('date')) < last_event['end'].get('dateTime', last_event['end'].get('date')):
-#                 # If the event overlaps with the last event, adjust its start time
-#                 event['start']['dateTime'] = last_event['end'].get('dateTime', last_event['end'].get('date'))
-#         non_overlapping_events.append(event)
+    return non_overlapping_events
 
-#     return non_overlapping_events
+non_overlapping_events = resolve_overlaps(overlapping_events_info)
 
-# non_overlapping_events = resolve_overlaps(events)
+# Assuming service is your authenticated Google Calendar service object
+for event in non_overlapping_events:
+    try:
+        new_start_time = event['start'].get('dateTime')
+        new_end_time = event['end'].get('dateTime')
+        if not new_start_time:
+            new_start_time = event['start'].get('date')
+            new_end_time = (parse(event['end'].get('date')) + timedelta(days=1)).isoformat()
+        else:
+            new_start_time = parse(new_start_time).replace(tzinfo=pytz.UTC).isoformat()
+            new_end_time = parse(new_end_time).replace(tzinfo=pytz.UTC).isoformat()
 
-# for event in non_overlapping_events:
-#     start_time = event['start'].get('dateTime', event['start'].get('date'))
-#     end_time = event['end'].get('dateTime', event['end'].get('date'))
-#     print(f'Event: {event["summary"]}, Start time: {start_time}, End time: {end_time}')
+        # Check if the start date matches the date in the event ID
+        event_id_date = event['id'].split('_')[-1]
+        start_date = parse(new_start_time).date().isoformat()
+        if event_id_date != start_date:
+            # If the dates don't match, create a new event and delete the old one
+            new_event = {
+                'summary': event['summary'],
+                'start': {'dateTime': new_start_time, 'timeZone': 'UTC'},
+                'end': {'dateTime': new_end_time, 'timeZone': 'UTC'},
+            }
+            service.events().insert(calendarId=calendar_id, body=new_event).execute()
+            service.events().delete(calendarId=calendar_id, eventId=event['id']).execute()
+        else:
+            # If the dates match, update the event as usual
+            change_event_time(service, event, new_start_time, new_end_time)
+
+        print(f"Successfully updated event '{event['summary']}' with new start time {new_start_time} and end time {new_end_time}")
+    except Exception as e:
+        print(f"Failed to update event '{event['summary']}': {str(e)}")
