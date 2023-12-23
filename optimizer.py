@@ -1,32 +1,24 @@
-import os
-import pickle
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
+from calendar import Calendar
 
-class Authentication:
-    def __init__(self):
-        # Define the scopes required by the Google Calendar API
-        self.SCOPES = ['https://www.googleapis.com/auth/calendar']
+## TODO: Implement the Optimizer class
 
-    def build_service(self):
-        """Builds and returns a service object for the Google Calendar API."""
-        creds = None
-        # The file token.pickle stores the user's access and refresh tokens, and is
-        # created automatically when the authorization flow completes for the first time.
-        if os.path.exists('token.pickle'):
-            with open('token.pickle', 'rb') as token:
-                creds = pickle.load(token)
-        # If there are no (valid) credentials available, let the user log in.
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    'credentials.json', self.SCOPES)
-                creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
-            with open('token.pickle', 'wb') as token:
-                pickle.dump(creds, token)
-        service = build('calendar', 'v3', credentials=creds)
-        return service
+class Optimizer:
+    def __init__(self, calendar):
+        self.calendar = calendar
+
+    def check_overlaps(self, events):
+        # Check for overlapping events and ask the user to approve them
+        pass
+
+    def ensure_gaps(self, events):
+        # Ensure there is a 5-10 minute gap between each event
+        pass
+
+    def convert_short_events_to_tasks(self, events):
+        # Convert events that are less than 15 minutes long to tasks
+        for event in events:
+            self.calendar.convert_event_to_task(event)
+
+    def calculate_travel_time(self, events):
+        # Calculate the travel time between events
+        pass
