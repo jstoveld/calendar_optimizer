@@ -1,39 +1,42 @@
-from calendar import Calendar
-from datetime import timedelta
+from cal import Calendar
+from datetime import datetime, timedelta
+from dateutil.parser import parse
+from dateutil.tz import tzutc
 
 class Optimizer:
     def __init__(self, calendar):
         self.calendar = calendar
 
-    def check_overlaps(self, start_time, end_time):
-        # Get all events between start_time and end_time
-        events = self.calendar.get_events(start_time, end_time)
-
+    def check_overlaps(self, events):
         # Sort events by start time
-        events.sort(key=lambda x: x['start']['dateTime'])
+        events.sort(key=lambda x: x['start'].get('dateTime', x['start'].get('date')))
 
-        # Check for overlapping events
+        # Check for overlaps and calculate gap
+        gap = None
         for i in range(1, len(events)):
-            if events[i]['start']['dateTime'] < events[i-1]['end']['dateTime']:
-                print(f"Overlapping events: {events[i-1]['summary']} and {events[i]['summary']}")
+            start_i = parse(events[i]['start'].get('dateTime', events[i]['start'].get('date'))).astimezone(tzutc())
+            end_i_1 = parse(events[i-1]['end'].get('dateTime', events[i-1]['end'].get('date'))).astimezone(tzutc())
+            if start_i < end_i_1:
+                print(f"Overlap between {events[i-1]['summary']} and {events[i]['summary']}")
+            else:
+                gap = (start_i - end_i_1).total_seconds() / 60  # Calculate gap in minutes
 
-    def ensure_gaps(self, start_time, end_time):
-        # Get all events between start_time and end_time
-        events = self.calendar.get_events(start_time, end_time)
+        # Return the sorted list of events and the gap
+        return events, gap
 
-        # Ensure there is a 5-10 minute gap between each event
-        for i in range(1, len(events)):
-            gap = events[i]['start']['dateTime'] - events[i-1]['end']['dateTime']
-            if gap < timedelta(minutes=5) or gap > timedelta(minutes=10):
-                print(f"Inadequate gap between {events[i-1]['summary']} and {events[i]['summary']}")
+    def ensure_gaps(self, events, gap):
+        # Check if gap is less than 5 minutes
+        if gap < 5:
+            print(f"Insufficient gap of {gap} minutes")
 
-    def convert_short_events_to_tasks(self, start_time, end_time):
-        # Get all events between start_time and end_time
-        events = self.calendar.get_events(start_time, end_time)
-
-        # Convert short events to tasks
+    def convert_short_events_to_tasks(self, events, end_time):
         for event in events:
-            self.calendar.convert_event_to_task(event)
+            start_time = parse(event['start'].get('dateTime', event['start'].get('date'))).astimezone(tzutc())
+            end_event_time = parse(event['end'].get('dateTime', event['end'].get('date'))).astimezone(tzutc())
+            duration = (end_event_time - start_time).total_seconds() / 60  # Calculate duration in minutes
+            if duration < 30:  # If the event is shorter than 30 minutes
+                self.calendar.delete_event(event['id'])
+                self.calendar.create_task(event['summary'], event['description'])
 
     def calculate_travel_time(self, start_time, end_time):
         # Get all events between start_time and end_time
