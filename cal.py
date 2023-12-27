@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 from dateutil.tz import tzutc
+from authentication import Authentication
 
 
 class Calendar:
@@ -23,28 +24,28 @@ class Calendar:
             'summary': summary,
             'description': description,
             'start': {
-                'dateTime': start_time.isoformat() + 'Z',
-                'timeZone': 'America/New_York',
+                'dateTime': start_time.isoformat(),
+                'timeZone': 'UTC',
             },
             'end': {
-                'dateTime': end_time.isoformat() + 'Z',
-                'timeZone': 'America/New_York',
+                'dateTime': end_time.isoformat(),
+                'timeZone': 'UTC',
             },
         }
-        event = self.service.events().insert(calendarId=self.calendar_id, body=event).execute()
-        return event
+        created_event = self.service.events().insert(calendarId=self.calendar_id, body=event).execute()
+        return created_event
 
     def delete_event(self, event_id):
         self.service.events().delete(calendarId=self.calendar_id, eventId=event_id).execute()
 
-    def convert_short_events_to_tasks(self, events):
-        for event in events:
-            start_time = parse(event['start'].get('dateTime', event['start'].get('date'))).astimezone(tzutc())
-            end_event_time = parse(event['end'].get('dateTime', event['end'].get('date'))).astimezone(tzutc())
-            duration = (end_event_time - start_time).total_seconds() / 60  # Calculate duration in minutes
-            if duration < 30:  # If the event is shorter than 30 minutes
-                self.delete_event(event['id'])
-                self.create_task(event['summary'], event.get('description'), start_time.isoformat(), (start_time + timedelta(minutes=duration)).isoformat())
+    def update_event(self, event_id, event):
+        # Fetch the current event from the server
+        current_event = self.service.events().get(calendarId=self.calendar_id, eventId=event_id).execute()
+        # Set the sequence value in the update request to the current sequence value
+        event['sequence'] = current_event['sequence']
+        # Update the event
+        updated_event = self.service.events().update(calendarId=self.calendar_id, eventId=event_id, body=event).execute()
+        return updated_event
 
     def create_task(self, summary, description=None, start_time=None, end_time=None):
         if start_time is None:
