@@ -83,5 +83,17 @@ try:
         print("Your calendar has been optimized.")
     else:
         print("No changes have been made to your calendar.")
+
+    # Convert short events to tasks
+    calendar.convert_short_events_to_tasks(events)
+
+    # Get the updated events from the calendar
+    updated_events = calendar.get_events(start_time, end_time)
+
+    # Check if any events were converted to tasks
+    if len(events) != len(updated_events):
+        print("Some events were converted to tasks.")
+    else:
+        print("No events were converted to tasks.")
 except Exception as e:
     print(f"An error occurred: {e}")
