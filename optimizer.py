@@ -12,18 +12,18 @@ class Optimizer:
         events.sort(key=lambda x: x['start'].get('dateTime', x['start'].get('date')))
 
         # Check for overlaps and calculate gap
+        overlapping_events = []
         gap = None
         for i in range(1, len(events)):
             start_i = parse(events[i]['start'].get('dateTime', events[i]['start'].get('date'))).astimezone(tzutc())
             end_i_1 = parse(events[i-1]['end'].get('dateTime', events[i-1]['end'].get('date'))).astimezone(tzutc())
             if start_i < end_i_1:
-                print(f"Overlap between {events[i-1]['summary']} and {events[i]['summary']}")
+                overlapping_events.append([events[i-1], events[i]])
             else:
                 gap = (start_i - end_i_1).total_seconds() / 60  # Calculate gap in minutes
 
-        # Return the sorted list of events and the gap
-        return events, gap
-
+        # Return the overlapping events and the gap
+        return overlapping_events, gap
     def ensure_gaps(self, events, gap):
         # Check if gap is less than 5 minutes
         if gap < 5:
