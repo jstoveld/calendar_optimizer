@@ -3,6 +3,15 @@ class Task:
         self.service = service
         self.tasklist_id = self.get_tasklist_id(tasklist_name)
 
+    def get_all_tasklists(self):
+        """Get and print all task lists"""
+        # Get the list of task lists
+        tasklists = self.service.tasklists().list().execute()
+
+        # Print each task list
+        for tasklist in tasklists['items']:
+            print(f"Tasklist Name: {tasklist['title']}, Tasklist ID: {tasklist['id']}")
+
     def get_tasklist_id(self, tasklist_name):
         """Get the ID of the task list with the specified name"""
         # Get the list of task lists
