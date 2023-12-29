@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from authentication import Authentication
 from cal import Calendar
 from optimizer import Optimizer
+from task import Task
 from datetime import datetime, timedelta
 from googleapiclient.errors import HttpError
 
@@ -16,6 +17,8 @@ service = auth.build_service()
 # Create a Calendar object
 calendar_id = os.getenv('CALENDAR_ID')
 calendar = Calendar(service, calendar_id)
+tasks_service = auth.build_tasks_service()
+task = Task(tasks_service)
 
 try:
     # Get events for a specific time range
