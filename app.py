@@ -17,8 +17,11 @@ service = auth.build_service()
 # Create a Calendar object
 calendar_id = os.getenv('CALENDAR_ID')
 calendar = Calendar(service, calendar_id)
+
+# Create a Task object and select a tasklist
 tasks_service = auth.build_tasks_service()
 task = Task(tasks_service)
+selected_tasklist_id = task.select_tasklist()
 
 try:
     # Get events for a specific time range
