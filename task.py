@@ -41,18 +41,22 @@ class Task:
 
     def create_task(self, title, notes, due_date=None):
         """Create a new task in the specified task list"""
-        # Define the task
-        task = {
-            'title': title,
-            'notes': notes,
-        }
-        if due_date:
-            task['due'] = due_date.isoformat()+'Z'  # 'Z' indicates UTC time
+        try:
+            # Define the task
+            task = {
+                'title': title,
+                'notes': notes,
+            }
+            if due_date:
+                task['due'] = due_date.isoformat()+'Z'  # 'Z' indicates UTC time
 
-        # Create the task
-        result = self.service.tasks().insert(tasklist=self.tasklist_id, body=task).execute()
+            # Create the task
+            result = self.service.tasks().insert(tasklist=self.tasklist_id, body=task).execute()
 
-        # Print the title and notes of the created task
-        print(f"Created \"{result['title']}\" with the description of \"{result['notes']}\".")
+            # Print the title and notes of the created task
+            print(f"Created \"{result['title']}\" with the description of \"{result['notes']}\".")
 
-        return result
+            return result
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
