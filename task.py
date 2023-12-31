@@ -24,20 +24,29 @@ class Task:
         for i, tasklist_name in enumerate(all_tasklists, start=1):
             print(f"{i}. {tasklist_name}")
 
-        # Ask the user to select a tasklist by number
-        selected_index = int(input("Please select a tasklist by number: ")) - 1
+        while True:
+            try:
+                # Ask the user to select a tasklist by number
+                selected_index = int(input("Please select a tasklist by number: ")) - 1
 
-        # Get the selected tasklist name
-        selected_tasklist_name = list(all_tasklists.keys())[selected_index]
+                # Check if the selected index is within the range of available tasklists
+                if selected_index < 0 or selected_index >= len(all_tasklists):
+                    print("Invalid selection. Please select a number within the range of available tasklists.")
+                    continue
 
-        # Set the tasklist_id attribute
-        self.tasklist_id = all_tasklists.get(selected_tasklist_name, '@default')
+                # Get the selected tasklist name
+                selected_tasklist_name = list(all_tasklists.keys())[selected_index]
 
-        # Print the selected tasklist
-        print(f"You have selected: {selected_tasklist_name}")
+                # Set the tasklist_id attribute
+                self.tasklist_id = all_tasklists.get(selected_tasklist_name, '@default')
 
-        # Return the selected tasklist ID
-        return self.tasklist_id
+                # Print the selected tasklist
+                print(f"You have selected: {selected_tasklist_name}")
+
+                # Return the selected tasklist ID
+                return self.tasklist_id
+            except ValueError:
+                print("Invalid input. Please enter a number.")
 
     def create_task(self, title, notes, due_date=None):
         """Create a new task in the specified task list"""

@@ -4,6 +4,7 @@ from authentication import Authentication
 from cal import Calendar
 from optimizer import Optimizer
 from task import Task
+from converter import Converter
 from datetime import datetime, timedelta
 from googleapiclient.errors import HttpError
 
@@ -43,32 +44,30 @@ except HttpError as e:
     else:
         raise
 
-# Get events for a specific time range
-start_time = datetime.now()
-end_time = start_time + timedelta(days=1)
-events = calendar.get_events(start_time, end_time)
-
-# Create an Optimizer object
-optimizer = Optimizer(calendar)
+# Create a Converter object
+converter = Converter(calendar, task)
 
 # Convert events to tasks based on user input and get the remaining events
-tasks, events = optimizer.convert_event_to_task(events)
+tasks, events = converter.event_to_task(events)
 
-# Optimize the remaining events
-optimized_events = optimizer.optimize_events(events)
+    # # Create an Optimizer object
+    # optimizer = Optimizer(calendar)
 
-# Print tasks
-print("Tasks:")
-for task in tasks:
-    print(f"Summary: {task['summary']}")
-    print(f"Start: {task['start'].get('dateTime', task['start'].get('date'))}")
-    print(f"End: {task['end'].get('dateTime', task['end'].get('date'))}")
-    print()
+    # # Optimize the remaining events
+    # optimized_events = optimizer.optimize_events(events)
 
-# Print optimized events
-print("Optimized events:")
-for event in optimized_events:
-    print(f"Summary: {event['summary']}")
-    print(f"Start: {event['start'].get('dateTime', event['start'].get('date'))}")
-    print(f"End: {event['end'].get('dateTime', event['end'].get('date'))}")
-    print()
+    # # Print tasks
+    # print("Tasks:")
+    # for task in tasks:
+    #     print(f"Summary: {task['summary']}")
+    #     print(f"Start: {task['start'].get('dateTime', task['start'].get('date'))}")
+    #     print(f"End: {task['end'].get('dateTime', task['end'].get('date'))}")
+    #     print()
+
+    # # Print optimized events
+    # print("Optimized events:")
+    # for event in optimized_events:
+    #     print(f"Summary: {event['summary']}")
+    #     print(f"Start: {event['start'].get('dateTime', event['start'].get('date'))}")
+    #     print(f"End: {event['end'].get('dateTime', event['end'].get('date'))}")
+    #     print()
