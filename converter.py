@@ -6,8 +6,8 @@ class Converter:
         self.task = task
 
 
-## TODO We need to revise this so that the method will not reply with an error on notes. 
-## Likely an issue with converiting the desctiption to notes - or a None object.
+## Handles the tasks created from events.
+## TODO: Add a method to convert a task to an event
     def event_to_task(self, events):
         tasks = []
         remaining_events = []

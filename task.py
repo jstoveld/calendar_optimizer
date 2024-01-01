@@ -51,6 +51,10 @@ class Task:
     def create_task(self, title, notes, due_date=None):
         """Create a new task in the specified task list"""
         try:
+            # Ensure that notes is a string
+            if isinstance(notes, tuple):
+                notes = notes[0] if notes else ''
+
             # Define the task
             task = {
                 'title': title,
@@ -63,7 +67,10 @@ class Task:
             result = self.service.tasks().insert(tasklist=self.tasklist_id, body=task).execute()
 
             # Print the title and notes of the created task
-            print(f"Created \"{result['title']}\" with the description of \"{result['notes']}\".")
+            notes = result.get('notes')
+            if notes is None:
+                notes = "No description"
+            print(f"Created \"{result['title']}\" {notes}.")
 
             return result
 
