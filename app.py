@@ -50,8 +50,9 @@ converter = Converter(calendar, task)
 # Convert events to tasks based on user input and get the remaining events
 tasks, events = converter.event_to_task(events)
 
-    # # Create an Optimizer object
-    # optimizer = Optimizer(calendar)
+# Create an Optimizer object
+optimizer = Optimizer(calendar)
+optimizer.identify_overlapping_events(events)
 
     # # Optimize the remaining events
     # optimized_events = optimizer.optimize_events(events)

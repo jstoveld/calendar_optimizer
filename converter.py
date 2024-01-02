@@ -7,7 +7,6 @@ class Converter:
 
 
 ## Handles the tasks created from events.
-## TODO: Add a method to convert a task to an event
     def event_to_task(self, events):
         tasks = []
         remaining_events = []
@@ -19,10 +18,12 @@ class Converter:
                 start_time = parse(event['start'].get('dateTime', event['start'].get('date')))
                 end_time = parse(event['end'].get('dateTime', event['end'].get('date')))
                 
+                # Convert the end time to a string in RFC 3339 format
+                due_date = end_time.isoformat()
+                
                 # Map event fields to task fields
                 title = event['summary']
                 notes = event.get('description', '')  # provide a default value of '' for description
-                due_date = end_time  # or start_time, depending on your needs
                 
                 # Convert the event to a task
                 task = self.task.create_task(title, notes, due_date)
@@ -35,6 +36,7 @@ class Converter:
                 remaining_events.append(event)
         return tasks, remaining_events
     
+## TODO: Add a method to convert a task to an event
     def task_to_event(self, task):
         # Convert the task to a calendar event
         # Use self.calendar to interact with the calendar
