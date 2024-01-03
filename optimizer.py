@@ -3,33 +3,30 @@ from datetime import timedelta
 from dateutil.tz import tzutc
 from authentication import Authentication
 from datetime import datetime
+from dateutil.tz import tzlocal
 
 
 class Optimizer:
     def __init__(self, calendar):
         self.calendar = calendar
 
-    @staticmethod
-    def get_event_start_time(event):
-        """Extract and parse the start time of an event"""
-        start_time_str = event['start'].get('dateTime', event['start'].get('date'))
-        start_time = parse(start_time_str)
+    def get_event_start_time(self, event):
+        # Get the start time of the event
+        start_time = parse(event['start'].get('dateTime', event['start'].get('date')))
 
-        # If the start time is offset-naive, make it offset-aware by adding the UTC timezone
+        # If the start time is offset-naive, make it offset-aware by adding the local timezone
         if start_time.tzinfo is None or start_time.tzinfo.utcoffset(start_time) is None:
-            start_time = start_time.replace(tzinfo=tzutc())
+            start_time = start_time.replace(tzinfo=tzlocal())
 
         return start_time
 
-    @staticmethod
-    def get_event_end_time(event):
-        """Extract and parse the end time of an event"""
-        end_time_str = event['end'].get('dateTime', event['end'].get('date'))
-        end_time = parse(end_time_str)
+    def get_event_end_time(self, event):
+        # Get the end time of the event
+        end_time = parse(event['end'].get('dateTime', event['end'].get('date')))
 
-        # If the end time is offset-naive, make it offset-aware by adding the UTC timezone
+        # If the end time is offset-naive, make it offset-aware by adding the local timezone
         if end_time.tzinfo is None or end_time.tzinfo.utcoffset(end_time) is None:
-            end_time = end_time.replace(tzinfo=tzutc())
+            end_time = end_time.replace(tzinfo=tzlocal())
 
         return end_time
 

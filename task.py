@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 class Task:
     def __init__(self, service):
         self.service = service
@@ -49,24 +52,26 @@ class Task:
                 print("Invalid input. Please enter a number.")
 
     def create_task(self, title, notes, due_date=None):
-        """Create a new task in the specified task list"""
         try:
-            # Ensure that notes is a string
             if isinstance(notes, tuple):
                 notes = notes[0] if notes else ''
 
-            # Define the task
             task = {
                 'title': title,
                 'notes': notes,
             }
             if due_date:
-                task['due'] = due_date.isoformat()+'Z'  # 'Z' indicates UTC time
+                if isinstance(due_date, datetime):
+                    task['due'] = due_date.isoformat()+'Z'
+                else:
+                    print(f"Error: due_date is not a datetime object. It's a {type(due_date).__name__}.")
+                    return
 
-            # Create the task
+            print(f"tasklist_id: {self.tasklist_id}")
+            print(f"task: {task}")
+
             result = self.service.tasks().insert(tasklist=self.tasklist_id, body=task).execute()
 
-            # Print the title and notes of the created task
             notes = result.get('notes')
             if notes is None:
                 notes = "No description"
