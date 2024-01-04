@@ -6,6 +6,15 @@ class Task:
         self.service = service
         self.tasklist_id = None
 
+    def get_tasks(self, tasklist_id):
+        try:
+            results = self.service.tasks().list(tasklist=tasklist_id).execute()
+            tasks = results.get('items', [])
+            return tasks
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return []
+
     def get_all_tasklists(self):
         """Get and return all task lists"""
         # Get the list of task lists
@@ -51,6 +60,13 @@ class Task:
             except ValueError:
                 print("Invalid input. Please enter a number.")
 
+    def delete_task(self, task_id):
+        try:
+            self.service.tasks().delete(tasklist=self.tasklist_id, task=task_id).execute()
+            print(f"Task with ID '{task_id}' has been deleted.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+    
     def create_task(self, title, notes, due_date=None):
         try:
             if isinstance(notes, tuple):

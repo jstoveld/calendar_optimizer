@@ -32,9 +32,17 @@ class Converter:
             else:
                 remaining_events.append(event)
         return tasks, remaining_events
-    
-## TODO: Add a method to convert a task to an event
-    def task_to_event(self, task):
-        # Convert the task to a calendar event
-        # Use self.calendar to interact with the calendar
-        pass
+
+    def task_to_event(self, tasks):
+        events = []
+        for task in tasks:
+            convert_to_event = input(f"Does the task '{task['title']}' require an event on our calendar? (yes/no): ")
+            if convert_to_event.lower() == 'yes':
+                title = task['title']
+
+                event = self.calendar.create_event(title)
+                events.append(event)
+
+                self.task.delete_task(task['id'])
+                print(f"The task '{task['title']}' has been converted to an event and deleted from the task list.")
+        return events

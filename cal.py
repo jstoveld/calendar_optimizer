@@ -1,6 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from dateutil.parser import parse
 from dateutil.tz import tzutc
+from tzlocal import get_localzone
+from zoneinfo import ZoneInfo
 from authentication import Authentication
 
 
@@ -19,17 +21,29 @@ class Calendar:
         ).execute()
         return events_result.get('items', [])
 
-    def create_event(self, start_time, end_time, summary, description=None):
+    def create_event(self, title, start_time=None, end_time=None, description=None):
+        # Get the local timezone
+        local_tz = get_localzone()
+
+        # If start_time is not provided, set it to 10am the next day
+        if start_time is None:
+            now = datetime.now(local_tz)
+            start_time = datetime(now.year, now.month, now.day, 10, 0, 0, tzinfo=local_tz) + timedelta(days=1)
+
+        # If end_time is not provided, set it to 1 hour after the start_time
+        if end_time is None:
+            end_time = start_time + timedelta(hours=1)
+
         event = {
-            'summary': summary,
+            'summary': title,
             'description': description,
             'start': {
                 'dateTime': start_time.isoformat(),
-                'timeZone': 'UTC',
+                'timeZone': str(local_tz),
             },
             'end': {
                 'dateTime': end_time.isoformat(),
-                'timeZone': 'UTC',
+                'timeZone': str(local_tz),
             },
         }
         created_event = self.service.events().insert(calendarId=self.calendar_id, body=event).execute()
