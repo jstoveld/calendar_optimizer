@@ -60,8 +60,8 @@ events = converter.task_to_event(tasks)
 
 # Create an Optimizer object
 optimizer = Optimizer(calendar)
-optimizer.identify_overlapping_events(events)
-
+overlapping_event_groups = optimizer.identify_overlapping_events(events)
+optimizer.handle_overlapping_events(overlapping_event_groups)
 
 
 

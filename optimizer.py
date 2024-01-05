@@ -34,33 +34,60 @@ class Optimizer:
         # Sort the events by start time
         events.sort(key=self.get_event_start_time)
 
-        overlapping_events = []
+        overlapping_event_groups = []
+        current_group = [events[0]]
         for i in range(1, len(events)):
-            # If the start time of the current event is before the end time of the previous event, they overlap
-            if self.get_event_start_time(events[i]) < self.get_event_end_time(events[i-1]):
-                overlapping_events.append((events[i-1], events[i]))
+            # If the start time of the current event is before the end time of the last event in the current group, they overlap
+            if self.get_event_start_time(events[i]) < self.get_event_end_time(current_group[-1]):
+                # Add the current event to the current group
+                current_group.append(events[i])
+            else:
+                # If the current group has more than one event, it's an overlapping group
+                if len(current_group) > 1:
+                    overlapping_event_groups.append(current_group)
+                # Start a new group with the current event
+                current_group = [events[i]]
 
-        if overlapping_events:
+        # Don't forget to add the last group if it's an overlapping group
+        if len(current_group) > 1:
+            overlapping_event_groups.append(current_group)
+
+        if overlapping_event_groups:
             print("The following calendar events have a clash:")
-            for event1, event2 in overlapping_events:
-                print(f"\"{event1['summary']}\" overlaps with \"{event2['summary']}\"")
+            for group in overlapping_event_groups:
+                print(", ".join(event['summary'] for event in group))
         else:
             print("No overlapping events found.")
 
-        return overlapping_events
+        return overlapping_event_groups
+    
+    def handle_overlapping_events(self, overlapping_event_groups):
+        for group in overlapping_event_groups:
+            print(f"The following events overlap: {', '.join(event['summary'] for event in group)}")
+            print("What would you like to do?")
+            print("1. Delete an event")
+            print("2. Reschedule an event")
+            print("3. Shorten an event")
+            print("4. Ignore the overlap")
+            choice = input("Enter the number of your choice: ")
 
-
-
-
-
-
-
-
-
-
-## Will Revisit
-    # def optimize_events(self, events):
-    #     # Implement your event optimization logic here
-    #     # For example, you might want to sort the events by start time:
-    #     events.sort(key=lambda x: x['start'].get('dateTime', x['start'].get('date')) if x['start'].get('dateTime', x['start'].get('date')) is not None else '')
-    #     return events
+            if choice == '1':
+                for i, event in enumerate(group):
+                    print(f"{i+1}. {event['summary']}")
+                event_to_delete = input("Enter the number of the event you want to delete: ")
+                # Delete the selected event...
+            elif choice == '2':
+                for i, event in enumerate(group):
+                    print(f"{i+1}. {event['summary']}")
+                event_to_reschedule = input("Enter the number of the event you want to reschedule: ")
+                # Reschedule the selected event...
+            elif choice == '3':
+                for i, event in enumerate(group):
+                    print(f"{i+1}. {event['summary']}")
+                event_to_shorten = input("Enter the number of the event you want to shorten: ")
+                # Shorten the selected event...
+            elif choice == '4':
+                # Ignore the overlap
+                pass
+            else:
+                print("Invalid choice. Please try again.")
