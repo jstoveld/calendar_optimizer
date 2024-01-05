@@ -76,16 +76,19 @@ class Optimizer:
                     print(f"{i+1}. {event['summary']}")
                 event_to_delete = input("Enter the number of the event you want to delete: ")
                 # Delete the selected event...
+                # TODO: Delete the selected event
             elif choice == '2':
                 for i, event in enumerate(group):
                     print(f"{i+1}. {event['summary']}")
                 event_to_reschedule = input("Enter the number of the event you want to reschedule: ")
                 # Reschedule the selected event...
+                # TODO: Reschedule the selected event
             elif choice == '3':
                 for i, event in enumerate(group):
                     print(f"{i+1}. {event['summary']}")
                 event_to_shorten = input("Enter the number of the event you want to shorten: ")
                 # Shorten the selected event...
+                # TODO: Shorten the selected event
             elif choice == '4':
                 # Ignore the overlap
                 pass
