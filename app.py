@@ -56,7 +56,10 @@ tasks, events = converter.event_to_task(events)
 
 
 # Convert tasks to events based on user input
-events = converter.task_to_event(tasks)
+new_events = converter.task_to_event(tasks)
+
+# Append new events to the original list
+events.extend(new_events)
 
 # Create an Optimizer object
 optimizer = Optimizer(calendar)

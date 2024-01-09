@@ -76,7 +76,9 @@ class Optimizer:
                     print(f"{i+1}. {event['summary']}")
                 event_to_delete = input("Enter the number of the event you want to delete: ")
                 # Delete the selected event...
-                # TODO: Delete the selected event
+                event_id_to_delete = group[int(event_to_delete) - 1]['id']  # Assuming 'id' is a key in your event dictionary
+                self.calendar.delete_event(event_id_to_delete)
+                print(f"Event {event_to_delete} has been deleted.")
             elif choice == '2':
                 for i, event in enumerate(group):
                     print(f"{i+1}. {event['summary']}")
