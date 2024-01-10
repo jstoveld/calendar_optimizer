@@ -61,6 +61,34 @@ class Optimizer:
 
         return overlapping_event_groups
     
+    #TODO This is broken because the dateTime is posting a KeyError.
+    def find_open_blocks(self, events):
+        """
+        Find open blocks of time in a calendar.
+
+        Parameters:
+        events (list): The list of events. Each event is a dictionary with 'start' and 'end' keys.
+
+        Returns:
+        list: A list of open blocks. Each block is a dictionary with 'start' and 'end' keys.
+        """
+        # Convert the 'dateTime' strings into datetime objects and sort the events by start time
+        for event in events:
+            event['start'] = datetime.fromisoformat(event['start']['dateTime'])
+            event['end'] = datetime.fromisoformat(event['end']['dateTime'])
+        events.sort(key=lambda event: event['start'])
+
+        open_blocks = []
+        for i in range(1, len(events)):
+            # If the gap between the end of the previous event and the start of the current event is greater than min_duration...
+            if events[i]['start'] - events[i-1]['end'] >= self.min_duration:
+                # ...then this is an open block
+                open_blocks.append({'start': events[i-1]['end'], 'end': events[i]['start']})
+
+        return open_blocks
+    
+    ##########################################################
+    
     def handle_overlapping_events(self, overlapping_event_groups):
         for group in overlapping_event_groups:
             print(f"The following events overlap: {', '.join(event['summary'] for event in group)}")

@@ -18,6 +18,7 @@ service = auth.build_service()
 # Create a Calendar object
 calendar_id = os.getenv('CALENDAR_ID')
 calendar = Calendar(service, calendar_id)
+min_duration = timedelta(minutes=30)
 
 # Create a Task object and select a tasklist
 tasks_service = auth.build_tasks_service()
@@ -66,6 +67,9 @@ optimizer = Optimizer(calendar)
 overlapping_event_groups = optimizer.identify_overlapping_events(events)
 optimizer.handle_overlapping_events(overlapping_event_groups)
 
+
+# Find open blocks of time
+optimizer.find_open_blocks(events)
 
 
 
